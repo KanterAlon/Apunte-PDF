@@ -2,22 +2,14 @@ import os
 from flask import Flask, request, render_template, jsonify
 from werkzeug.utils import secure_filename
 import PyPDF2
-from openai import OpenAI
-import httpx
+import openai
 
-# Cliente HTTP sin verificación SSL (por red con firewall o proxy)
-insecure_client = httpx.Client(verify=False)
-
-# Inicialización del cliente OpenAI
-client = OpenAI(
-    api_key="",  # ← Pegá tu clave real aquí entre comillas
-    http_client=insecure_client
-)
+# ← PONÉ TU CLAVE ACÁ
+openai.api_key = "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"
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 
-# Extraer texto de las páginas seleccionadas del PDF
 def extract_text_from_pdf(pdf_path, page_indices):
     text = ""
     with open(pdf_path, 'rb') as file:
@@ -42,8 +34,6 @@ def process():
     end = int(request.form['end'])
     step = int(request.form['step'])
     initial_prompt = request.form['prompt']
-
-    # Limpiar el prompt (evita errores de codificación)
     initial_prompt = initial_prompt.encode('utf-8', errors='ignore').decode('utf-8')
 
     filename = secure_filename(file.filename)
@@ -73,13 +63,12 @@ def process():
             ]
 
         print(f"[INFO] Enviando partición {idx + 1} a OpenAI...")
-        response = client.chat.completions.create(
+        response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=messages
         )
-        new_content = response.choices[0].message.content
+        new_content = response['choices'][0]['message']['content']
         print(f"[INFO] Respuesta recibida de OpenAI para partición {idx + 1}")
-
         full_apunte += f"\n\n---\n\n{new_content}"
 
     print("\n✅ Apunte completo generado.")

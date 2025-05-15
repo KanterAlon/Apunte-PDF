@@ -1,0 +1,162 @@
+# 📚 Generador de Apuntes desde PDF con OpenAI
+
+
+https://docs.google.com/document/d/12xFQrLF6u1wNZJviSCE7xgGaBkYI_ETzqeqC1zmDSvE/edit?usp=sharing
+pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org --disable-pip-version-check --no-cache-dir --cert="" -r requirements.txt
+python -m venv venv
+venv\Scripts\activate
+
+
+Esta es una aplicación web local que te permite:
+
+* Subir un PDF con múltiples páginas de texto.
+* Elegir qué páginas del PDF procesar.
+* Dividir esas páginas en particiones (por ejemplo: de a 5 páginas).
+* Enviar cada partición a la API de OpenAI para generar un apunte educativo claro, completo y fácil de entender.
+* Obtener un apunte final continuo, generado por inteligencia artificial, que podés copiar o guardar.
+
+---
+
+## ⚙️ Requisitos
+
+* Python 3.10 o superior
+* pip
+* Acceso a una clave API de OpenAI ([https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys))
+
+---
+
+## 💠 Instalación y primeros pasos
+
+### 1. Clonar el repositorio
+
+```bash
+git clone https://github.com/tu-usuario/tu-repo.git
+cd tu-repo
+```
+
+### 2. Crear un entorno virtual
+
+```bash
+python -m venv venv
+```
+
+### 3. Activar el entorno virtual
+
+* **Windows CMD:**
+
+  ```bash
+  venv\Scripts\activate
+  ```
+
+* **PowerShell:**
+
+  ```powershell
+  .\venv\Scripts\Activate.ps1
+  ```
+
+* **Linux/macOS:**
+
+  ```bash
+  source venv/bin/activate
+  ```
+
+---
+
+### 4. Instalar dependencias (compatible con firewall / proxy)
+
+```bash
+pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org --disable-pip-version-check --no-cache-dir --cert="" -r requirements.txt
+```
+
+> ❌ Si hay problemas con la versión de `openai`, usar esta:
+>
+> ```txt
+> openai==0.28
+> ```
+
+---
+
+### 5. Crear el archivo `.env` con tu clave de OpenAI
+
+En la raíz del proyecto, creá un archivo llamado `.env` con este contenido:
+
+```env
+OPENAI_API_KEY=sk-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+```
+
+---
+
+### 6. Ejecutar la aplicación
+
+```bash
+python app.py
+```
+
+Luego abrí tu navegador en:
+**[http://127.0.0.1:5000](http://127.0.0.1:5000)**
+
+---
+
+## 📜 Estructura del Proyecto
+
+```
+.
+├── app.py                # Backend principal con Flask y conexión a OpenAI
+├── requirements.txt      # Dependencias
+├── .env                  # (No se sube) Clave privada de OpenAI
+├── templates/
+│   └── index.html        # Interfaz web principal
+├── static/
+│   └── script.js         # Lógica JS del frontend
+├── uploads/              # Carpeta temporal para archivos PDF subidos
+```
+
+---
+
+## 🛡️ Seguridad
+
+* Tu clave API se maneja mediante `.env` y **no debe subirse a Git**.
+* El `.gitignore` ya excluye:
+
+  ```gitignore
+  .env
+  venv/
+  __pycache__/
+  uploads/
+  ```
+
+---
+
+## 🔧 Problemas comunes
+
+### 🔒 Certificado autofirmado / firewall
+
+Usá siempre este comando para instalar dependencias:
+
+```bash
+pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org --disable-pip-version-check --no-cache-dir --cert="" -r requirements.txt
+```
+
+### 🚨 Error con `jiter`
+
+Si no podés instalar la versión más nueva de `openai`, usá:
+
+```txt
+openai==0.28
+```
+
+Y pedime el código compatible si lo necesitás.
+
+---
+
+## 🚀 Mejoras sugeridas
+
+* Descargar el apunte como `.txt` o `.pdf`
+* Barra de progreso visual en la web
+* Soporte multilenguaje
+
+---
+
+## 📨 Contribuciones
+
+Pull requests bienvenidos. Para problemas específicos, usá la sección de Issues.
