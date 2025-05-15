@@ -22,7 +22,9 @@ session.mount("https://", UnsafeAdapter())
 openai.requestssession = session
 
 # 🔐 Tu clave API
-openai.api_key = ""  # ← reemplazala por tu clave real
+import os
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
