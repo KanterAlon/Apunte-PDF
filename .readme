@@ -2,9 +2,10 @@
 
 
 https://docs.google.com/document/d/12xFQrLF6u1wNZJviSCE7xgGaBkYI_ETzqeqC1zmDSvE/edit?usp=sharing
-pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org --disable-pip-version-check --no-cache-dir --cert="" -r requirements.txt
 python -m venv venv
 venv\Scripts\activate
+pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org --disable-pip-version-check --no-cache-dir --cert="" -r requirements.txt
+
 
 
 Esta es una aplicación web local que te permite:
