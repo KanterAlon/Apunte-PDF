@@ -1,35 +1,140 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Generador de Apuntes</title>
+    <meta charset="UTF-8">
+    <title>Generador de Apuntes desde PDF</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            background: #f5f6fa;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 1.2rem;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            margin-top: 0;
+            text-align: center;
+            font-size: 1.8rem;
+        }
+
+        label {
+            display: block;
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 0.7rem;
+            margin-top: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            margin-top: 1.5rem;
+            width: 100%;
+            padding: 0.9rem;
+            font-size: 1rem;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #2980b9;
+        }
+
+        .output {
+            margin-top: 2rem;
+            background: #f0f0f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Generador de Apuntes con OpenAI</h1>
-    <form id="apunteForm">
-        <label>Subí un PDF:</label>
-        <input type="file" name="pdf" required><br><br>
+    <header>
+        <h2>📘 Generador de Apuntes desde PDF</h2>
+    </header>
+    <div class="container">
+        <form id="pdfForm">
+            <label for="pdf">Seleccionar PDF:</label>
+            <input type="file" id="pdf" name="pdf" accept=".pdf" required>
 
-        <label>Página de inicio:</label>
-        <input type="number" name="start" required><br>
+            <label for="start">Página de inicio:</label>
+            <input type="number" id="start" name="start" required min="1">
 
-        <label>Página final:</label>
-        <input type="number" name="end" required><br>
+            <label for="end">Página final:</label>
+            <input type="number" id="end" name="end" required min="1">
 
-        <label>Partir cada cuántas páginas:</label>
-        <input type="number" name="step" required><br>
+            <label for="step">Dividir de a cuántas páginas:</label>
+            <input type="number" id="step" name="step" required min="1">
 
-        <label>Prompt inicial:</label><br>
-        <textarea name="prompt" rows="6" cols="50" required>
-Quiero que tomes este texto  y crees un apunte  completo, detallado y claro. El apunte debe estar organizado, ser lógico, con lenguaje fluido, accesible pero profundo. Explicá todos los conceptos y relaciones importantes. Te pasare mas texto despues de este para que continues el apunte.
-        </textarea><br><br>
+            <label for="prompt">Indicación inicial para OpenAI:</label>
+            <textarea id="prompt" name="prompt" rows="8">A partir del siguiente texto, generá un apunte claro, completo y profundamente explicativo que permita al lector estudiar y comprender todos los contenidos. El apunte debe desarrollar los temas de forma fluida, con lógica interna, buena redacción y detalle. Explicá lo que está sucediendo, los conceptos clave, y el trasfondo necesario para entender el texto, como si se tratara de una guía de estudio. Si es un cuento o texto literario, analizá los personajes, la trama, el conflicto, el contexto y los símbolos. Si es un texto histórico o filosófico, explicá las ideas principales, el contexto en que fue escrito y su relevancia. Este es solo el primer fragmento del texto, por lo tanto el apunte debe poder continuar a medida que se le agreguen nuevas partes.
+                </textarea>
+                
 
-        <button type="submit">Generar Apunte</button>
-    </form>
+            <button type="submit">📤 Procesar PDF y generar apunte</button>
+        </form>
 
-    <h2>Apunte generado:</h2>
-    <button onclick="copiarTexto()">Copiar al portapapeles</button>
-    <pre id="resultado"></pre>
+        <div class="output" id="output" style="display:none;"></div>
+    </div>
 
-    <script src="/static/script.js"></script>
+    <script>
+        document.getElementById("pdfForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const output = document.getElementById("output");
+            output.style.display = "block";
+            output.innerText = "⏳ Procesando... Por favor, esperá...";
+
+            fetch("/process", {
+                method: "POST",
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    output.innerText = data.apunte;
+                })
+                .catch(error => {
+                    output.innerText = "❌ Ocurrió un error al procesar el PDF.";
+                    console.error(error);
+                });
+        });
+    </script>
 </body>
 </html>

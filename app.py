@@ -3,9 +3,26 @@ from flask import Flask, request, render_template, jsonify
 from werkzeug.utils import secure_filename
 import PyPDF2
 import openai
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.poolmanager import PoolManager
+import ssl
 
-# ← PONÉ TU CLAVE ACÁ
-openai.api_key = "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"
+# === DESACTIVA SSL SI TENÉS CERTIFICADO AUTOFIRMADO ===
+class UnsafeAdapter(HTTPAdapter):
+    def init_poolmanager(self, *args, **kwargs):
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        kwargs['ssl_context'] = ctx
+        return super().init_poolmanager(*args, **kwargs)
+
+session = requests.Session()
+session.mount("https://", UnsafeAdapter())
+openai.requestssession = session
+
+# 🔐 API Key de OpenAI (ponela directo acá si no usás .env)
+openai.api_key = ""  # ← Reemplazá por tu clave real
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -64,7 +81,7 @@ def process():
 
         print(f"[INFO] Enviando partición {idx + 1} a OpenAI...")
         response = openai.ChatCompletion.create(
-            model="gpt-4",
+            model="gpt-4o",
             messages=messages
         )
         new_content = response['choices'][0]['message']['content']
