@@ -8,7 +8,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.poolmanager import PoolManager
 import ssl
 
-# === DESACTIVA SSL SI TENÉS CERTIFICADO AUTOFIRMADO ===
+# === Desactiva SSL si estás en red con certificado autofirmado ===
 class UnsafeAdapter(HTTPAdapter):
     def init_poolmanager(self, *args, **kwargs):
         ctx = ssl.create_default_context()
@@ -21,8 +21,8 @@ session = requests.Session()
 session.mount("https://", UnsafeAdapter())
 openai.requestssession = session
 
-# 🔐 API Key de OpenAI (ponela directo acá si no usás .env)
-openai.api_key = ""  # ← Reemplazá por tu clave real
+# 🔐 Tu clave API
+openai.api_key = ""  # ← reemplazala por tu clave real
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -50,8 +50,7 @@ def process():
     start = int(request.form['start'])
     end = int(request.form['end'])
     step = int(request.form['step'])
-    initial_prompt = request.form['prompt']
-    initial_prompt = initial_prompt.encode('utf-8', errors='ignore').decode('utf-8')
+    initial_prompt = request.form['prompt'].strip()
 
     filename = secure_filename(file.filename)
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -63,30 +62,36 @@ def process():
 
     page_ranges = [list(range(i, min(i + step, end + 1))) for i in range(start, end + 1, step)]
     full_apunte = ""
+    messages = [{"role": "user", "content": initial_prompt}]
 
     for idx, page_range in enumerate(page_ranges):
         print(f"\n[INFO] Procesando partición {idx + 1} con páginas: {page_range}")
         pages_text = extract_text_from_pdf(filepath, [p - 1 for p in page_range])
-        pages_text = pages_text.encode('utf-8', errors='ignore').decode('utf-8')
+        pages_text = pages_text.encode('utf-8', errors='ignore').decode('utf-8').strip()
 
         if idx == 0:
-            messages = [
-                {"role": "user", "content": initial_prompt},
-                {"role": "user", "content": f"Texto de estudio:\n{pages_text}"}
-            ]
+            prompt = f"A continuación se presenta el primer fragmento del texto:\n\n{pages_text}"
         else:
-            messages = [
-                {"role": "user", "content": f"Continúa el apunte con el siguiente fragmento de texto del PDF:\n{pages_text}"}
-            ]
+            prompt = f"Continuá el apunte agregando y desarrollando este nuevo fragmento de texto:\n\n{pages_text}"
 
+        messages.append({"role": "user", "content": prompt})
         print(f"[INFO] Enviando partición {idx + 1} a OpenAI...")
-        response = openai.ChatCompletion.create(
-            model="gpt-4o",
-            messages=messages
-        )
-        new_content = response['choices'][0]['message']['content']
-        print(f"[INFO] Respuesta recibida de OpenAI para partición {idx + 1}")
-        full_apunte += f"\n\n---\n\n{new_content}"
+
+        try:
+            response = openai.ChatCompletion.create(
+                model="chatgpt-4o-latest",
+                messages=messages,
+                temperature=0.7
+            )
+            new_content = response['choices'][0]['message']['content'].strip()
+            print(f"[INFO] Respuesta recibida de OpenAI para partición {idx + 1}")
+
+            full_apunte += f"\n{new_content}\n"
+            messages.append({"role": "assistant", "content": new_content})
+
+        except openai.error.OpenAIError as e:
+            print(f"[ERROR] OpenAI API: {str(e)}")
+            return jsonify({"error": f"Error al procesar con OpenAI: {str(e)}"}), 500
 
     print("\n✅ Apunte completo generado.")
     return jsonify({"apunte": full_apunte.strip()})
