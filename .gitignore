@@ -1,0 +1,19 @@
+# Entorno virtual
+venv/
+
+# Archivos del sistema
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# Archivos de configuración de entorno
+.env
+
+# Archivos temporales
+uploads/
+*.bak
+*.swp
+.DS_Store
+Thumbs.db

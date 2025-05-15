@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generador de Apuntes</title>
+</head>
+<body>
+    <h1>Generador de Apuntes con OpenAI</h1>
+    <form id="apunteForm">
+        <label>Subí un PDF:</label>
+        <input type="file" name="pdf" required><br><br>
+
+        <label>Página de inicio:</label>
+        <input type="number" name="start" required><br>
+
+        <label>Página final:</label>
+        <input type="number" name="end" required><br>
+
+        <label>Partir cada cuántas páginas:</label>
+        <input type="number" name="step" required><br>
+
+        <label>Prompt inicial:</label><br>
+        <textarea name="prompt" rows="6" cols="50" required>
+Quiero que tomes este texto académico y crees un apunte educativo completo, detallado y claro. El apunte debe estar organizado, ser lógico, con lenguaje fluido, accesible pero profundo. Explicá todos los conceptos y relaciones importantes.
+        </textarea><br><br>
+
+        <button type="submit">Generar Apunte</button>
+    </form>
+
+    <h2>Apunte generado:</h2>
+    <button onclick="copiarTexto()">Copiar al portapapeles</button>
+    <pre id="resultado"></pre>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

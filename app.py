@@ -10,7 +10,7 @@ insecure_client = httpx.Client(verify=False)
 
 # Inicialización del cliente OpenAI
 client = OpenAI(
-    api_key="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",  # ← Pegá tu clave real aquí entre comillas
+    api_key="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",  # ← Pegá tu clave real aquí entre comillas
     http_client=insecure_client
 )
 
