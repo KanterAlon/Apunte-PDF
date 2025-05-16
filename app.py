@@ -1,12 +1,12 @@
 import os
-from flask import Flask, request, render_template, jsonify
-from werkzeug.utils import secure_filename
+import ssl
 import PyPDF2
 import openai
 import requests
+from flask import Flask, request, render_template, jsonify
+from werkzeug.utils import secure_filename
 from requests.adapters import HTTPAdapter
 from urllib3.poolmanager import PoolManager
-import ssl
 
 # === Desactiva SSL si estás en red con certificado autofirmado ===
 class UnsafeAdapter(HTTPAdapter):
@@ -17,18 +17,19 @@ class UnsafeAdapter(HTTPAdapter):
         kwargs['ssl_context'] = ctx
         return super().init_poolmanager(*args, **kwargs)
 
+# Configuración de sesión para certificados autofirmados
 session = requests.Session()
 session.mount("https://", UnsafeAdapter())
 openai.requestssession = session
 
-# 🔐 Tu clave API
-import os
+# Clave de API de OpenAI
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-
+# Inicializar Flask
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 
+# Función para extraer texto de páginas específicas del PDF
 def extract_text_from_pdf(pdf_path, page_indices):
     text = ""
     with open(pdf_path, 'rb') as file:
@@ -42,10 +43,12 @@ def extract_text_from_pdf(pdf_path, page_indices):
                     text += page_text + "\n"
     return text
 
+# Ruta principal
 @app.route('/')
 def index():
     return render_template('index.html')
 
+# Ruta para procesar el PDF
 @app.route('/process', methods=['POST'])
 def process():
     file = request.files['pdf']
@@ -54,6 +57,10 @@ def process():
     step = int(request.form['step'])
     initial_prompt = request.form['prompt'].strip()
 
+    # Asegurar que el directorio de uploads existe
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+    # Guardar archivo subido de forma segura
     filename = secure_filename(file.filename)
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     file.save(filepath)
@@ -98,6 +105,7 @@ def process():
     print("\n✅ Apunte completo generado.")
     return jsonify({"apunte": full_apunte.strip()})
 
+# Ejecutar el servidor
 if __name__ == '__main__':
     os.makedirs('uploads', exist_ok=True)
     print("[INFO] Servidor iniciado en http://127.0.0.1:5000")
